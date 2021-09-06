@@ -72,7 +72,7 @@ def json_to_csv(src_dir, dst_dir, json_file_name, csv_file_name):
 
         # print(df_tweets.head(5))
         #
-        print('number of tweets processed: ' + str(df_tweets.shape))
+        print('number of tweets processed: {} from file {}'.format(df_tweets.shape[0], json_file_name))
         df_tweets.to_csv(dst_file_dir, index = False)
 
     except ValueError:
