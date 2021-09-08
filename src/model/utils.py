@@ -10,7 +10,11 @@ urls = re.compile(r"https?://\S+")
 def process_text(text):
   text = hashtags.sub(' hashtag', text)
   text = mentions.sub(' entity', text)
+  text = urls.sub(' url', text)
   return text.strip().lower()
+
+def match_expr(pattern, string):
+  return not pattern.search(string) == None
 
 def get_data_wo_urls(dataset):
   link_with_urls = dataset.text.apply(lambda x: match_expr(urls, x))
