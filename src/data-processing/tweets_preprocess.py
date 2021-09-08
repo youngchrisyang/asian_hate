@@ -27,14 +27,14 @@ def full_text_imputing(data):
 
 if __name__ == "__main__":
     raw_tweets_path = '../../data'
-    raw_tweets_path = 'asian_hate_raw_tweets_df.csv'
-    raw_tweets = pd.read_csv(os.path.join(raw_tweets_path, raw_tweets_path))
+    filename = 'asian_hate_raw_tweets_df.csv'
+    raw_tweets = pd.read_csv(os.path.join(raw_tweets_path, filename))
     print('Start preprocessing...')
-    print('original number of tweets: {}').format(raw_tweets.shape[0])
+    print('original number of tweets: {}'.format(raw_tweets.shape[0]))
     output = keep_qualified(raw_tweets)
-    print('filtering qualified tweets: {}').format(output.shape[0])
-    output = remove_duplicates(output)
-    print('After removing duplicated idstrs, {} tweets were kept').format(output.shape[0])
+    print('filtering qualified tweets: {}'.format(output.shape[0]))
+    output = remove_duplicates(output, key = 'id_str')
+    print('After removing duplicated idstrs, {} tweets were kept'.format(output.shape[0]))
     output = full_text_imputing(output)
     output_filename = 'asian_hate_processe_tweets_dataframe.csv'
     output.to_csv(os.path.join(raw_tweets_path, output_filename))
