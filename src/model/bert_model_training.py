@@ -7,7 +7,6 @@ if device_name != '/device:GPU:0':
 print('Found GPU at: {}'.format(device_name))
 
 
-import re
 import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
@@ -16,13 +15,13 @@ from pytorch_pretrained_bert import BertTokenizer, BertConfig
 from pytorch_pretrained_bert import BertAdam, BertForSequenceClassification
 from tqdm import tqdm, trange
 import pandas as pd
-import io
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 #% matplotlib inline
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 from sklearn.metrics import matthews_corrcoef, confusion_matrix
+from utils import flat_accuracy, get_eval_report, compute_metrics
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_gpu = torch.cuda.device_count()
@@ -141,26 +140,26 @@ optimizer = BertAdam(optimizer_grouped_parameters,
 print("finished setting BertAdam hyperparameters")
 
 # Function to calculate the accuracy of our predictions vs labels
-def flat_accuracy(preds, labels):
-    pred_flat = np.argmax(preds, axis=1).flatten()
-    labels_flat = labels.flatten()
-    return np.sum(pred_flat == labels_flat) / len(labels_flat)
-
-
-def get_eval_report(labels, preds):
-    mcc = matthews_corrcoef(labels, preds)
-    tn, fp, fn, tp = confusion_matrix(labels, preds).ravel()
-    return {
-        "mcc": mcc,
-        "tp": tp,
-        "tn": tn,
-        "fp": fp,
-        "fn": fn
-    }
-
-def compute_metrics(labels, preds):
-    assert len(preds) == len(labels)
-    return get_eval_report(labels, preds)
+# def flat_accuracy(preds, labels):
+#     pred_flat = np.argmax(preds, axis=1).flatten()
+#     labels_flat = labels.flatten()
+#     return np.sum(pred_flat == labels_flat) / len(labels_flat)
+#
+#
+# def get_eval_report(labels, preds):
+#     mcc = matthews_corrcoef(labels, preds)
+#     tn, fp, fn, tp = confusion_matrix(labels, preds).ravel()
+#     return {
+#         "mcc": mcc,
+#         "tp": tp,
+#         "tn": tn,
+#         "fp": fp,
+#         "fn": fn
+#     }
+#
+# def compute_metrics(labels, preds):
+#     assert len(preds) == len(labels)
+#     return get_eval_report(labels, preds)
 
 print(compute_metrics([1,1,1,1], [0,0,1,1]))
 

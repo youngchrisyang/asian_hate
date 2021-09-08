@@ -1,4 +1,5 @@
-import re
+#TODO: need to preprocess texts exactly the same way as you process training data
+
 import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences

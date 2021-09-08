@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import os
-
+from utils import process_text, get_data_wo_urls
 import sys
 
 label_name = sys.argv[1]
@@ -45,26 +45,27 @@ label_text.columns = ['text','label']
 # Assign proper column names to labels
 label_text.head()
 
-import re
+# import re
+#
+# hashtags = re.compile(r"^#\S+|\s#\S+")
+# mentions = re.compile(r"^@\S+|\s@\S+")
+# urls = re.compile(r"https?://\S+")
 
-hashtags = re.compile(r"^#\S+|\s#\S+")
-mentions = re.compile(r"^@\S+|\s@\S+")
-urls = re.compile(r"https?://\S+")
+# def process_text(text):
+#   text = hashtags.sub(' hashtag', text)
+#   text = mentions.sub(' entity', text)
+#   return text.strip().lower()
+#
+# def match_expr(pattern, string):
+#   return not pattern.search(string) == None
 
-def process_text(text):
-  text = hashtags.sub(' hashtag', text)
-  text = mentions.sub(' entity', text)
-  return text.strip().lower()
-
-def match_expr(pattern, string):
-  return not pattern.search(string) == None
-
-def get_data_wo_urls(dataset):
-    link_with_urls = dataset.text.apply(lambda x: match_expr(urls, x))
-    return dataset[[not e for e in link_with_urls]]
+# def get_data_wo_urls(dataset):
+#     link_with_urls = dataset.text.apply(lambda x: match_expr(urls, x))
+#     return dataset[[not e for e in link_with_urls]]
 
 
 label_text.text = label_text.text.apply(process_text)
+label_text.text = label_text.text.apply(get_data_wo_urls)
 
 
 print(label_text.head())
