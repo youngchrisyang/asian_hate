@@ -6,7 +6,7 @@ if device_name != '/device:GPU:0':
   raise SystemError('GPU device not found')
 print('Found GPU at: {}'.format(device_name))
 
-
+import sys
 import torch
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from keras.preprocessing.sequence import pad_sequences
@@ -16,6 +16,7 @@ from pytorch_pretrained_bert import BertAdam, BertForSequenceClassification
 from tqdm import tqdm, trange
 import pandas as pd
 import os
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 #% matplotlib inline
@@ -23,27 +24,35 @@ from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 from sklearn.metrics import matthews_corrcoef, confusion_matrix
 from utils import flat_accuracy, get_eval_report, compute_metrics
 
+# SETUP GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_gpu = torch.cuda.device_count()
 torch.cuda.get_device_name(0)
 
-# READING PARAMETERS FROM COMMAND LINE
-import sys
+# # READING PARAMETERS FROM COMMAND LINE
+# import sys
+#
+# label_name = sys.argv[1]
+learning_rate = float(sys.argv[1])
+n_epoch = int(sys.argv[2])
+#
+# print("label name: " + str(label_name))
+# print("learning rate: " + str(learning_rate))
+# print("number of epoches: " + str(n_epoch))
 
-label_name = sys.argv[1]
-learning_rate = float(sys.argv[2])
-n_epoch = int(sys.argv[3])
-
-print("label name: " + str(label_name))
-print("learning rate: " + str(learning_rate))
-print("number of epoches: " + str(n_epoch))
-
-# READING TRAINING DATA TO FINE-TUNE BERT
+# READING TRAINING DATA FOR MODEL FINE-TUNING
 # Note: please use data after "upsampling" so that the binary labels have 50/50 of 1/0s.
-data_output_file = "~/Documents/twitter/data/affect_data/e_c_{}.csv".format(label_name)
-label_text = pd.read_csv(data_output_file)
+src_train_file = '../data/processed_annotations.csv'
 
-print(label_text.head( 10))
+with open(src_train_file, 'wb') as filehandle:
+  # store the data as binary data stream
+  label_text = pickle.load(filehandle)
+
+#label_text = pd.read_csv(src_train_file)
+
+print(label_text.head(10))
+
+# READING TRAINING DATA FOR MODEL FINE-TUNING
 
 # Pad sentences with start and end tokens used for BERT
 sentences = label_text.text.values
@@ -59,8 +68,8 @@ print (tokenized_texts[0])
 labels = label_text.label.values
 type(labels)
 type(labels[0])
+num_classes = label_text.label.nunique()
 
-# SEQUENCE PADDING
 # Maximum sentence length set to 256
 MAX_LEN = 256
 # Pad input tokens
@@ -116,7 +125,7 @@ print("finished batch setup")
 
 
 # MODEL TRAINING
-model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=num_classes)
 model.cuda()
 
 print("finished loading bert-base-uncased")
@@ -161,7 +170,7 @@ print("finished setting BertAdam hyperparameters")
 #     assert len(preds) == len(labels)
 #     return get_eval_report(labels, preds)
 
-print(compute_metrics([1,1,1,1], [0,0,1,1]))
+# print(compute_metrics([1,1,1,1], [0,0,1,1]))
 
 # Store our loss and accuracy for plotting
 train_loss_set = []
@@ -241,7 +250,7 @@ for _ in trange(epochs, desc="Epoch"):
 
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 
-output_dir = "~/Documents/twitter/model/affect_model/{}/".format(label_name)
+output_dir = "model_output"
 
 # Step 1: Save a model, configuration and vocabulary that you have fine-tuned
 
