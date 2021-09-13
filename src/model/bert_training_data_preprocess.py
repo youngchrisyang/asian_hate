@@ -17,7 +17,7 @@ if __name__ == "__main__":
     train.columns = ['text','label']
     train = train[1:]
     train.text = train.text.apply(process_text)
-    train['num_label'] = train.label.map({'Neutral':0, 'Hate':1, 'Counterhate':2, 'Non-Asian Aggression':3})
+    train['num_label'] = train.label.map({'Neutral':0, 'Hate':1, 'Counterhate':2, 'Non-Asian Aggression':1})
     
     train['num_label'] = train['num_label'].astype('int')
     train.to_csv(os.path.join(dst_dir, dst_filename), index = False)
