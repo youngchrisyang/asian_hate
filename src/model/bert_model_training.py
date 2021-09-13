@@ -42,9 +42,9 @@ n_epoch = int(sys.argv[2])
 
 # READING TRAINING DATA FOR MODEL FINE-TUNING
 # Note: please use data after "upsampling" so that the binary labels have 50/50 of 1/0s.
-src_train_file = '../data/processed_annotations.csv'
+src_train_file = '../../data/processed_annotations.csv'
 
-with open(src_train_file, 'wb') as filehandle:
+with open(src_train_file, 'rb') as filehandle:
   # store the data as binary data stream
   label_text = pickle.load(filehandle)
 
@@ -65,10 +65,10 @@ tokenized_texts = [tokenizer.tokenize(sent) for sent in sentences]
 print ("Tokenize the first sentence:")
 print (tokenized_texts[0])
 
-labels = label_text.label.values
+labels = label_text.num_label.values
 type(labels)
 type(labels[0])
-num_classes = label_text.label.nunique()
+num_classes = label_text.num_label.nunique()
 
 # Maximum sentence length set to 256
 MAX_LEN = 256
@@ -113,6 +113,7 @@ print("set batch size")
 batch_size = 32
 
 # Create an iterator with torch DataLoader
+torch.manual_seed(15213)
 train_data = TensorDataset(train_inputs, train_masks, train_labels)
 train_sampler = RandomSampler(train_data)
 train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=batch_size)
