@@ -30,7 +30,6 @@ def get_f1_score(preds, labels):
     sep_f1s = f1_score(labels, preds, average=None)
     return micro_f1, sep_f1s
 
-
 def get_eval_report(labels, preds):
   mcc = matthews_corrcoef(labels, preds)
   tn, fp, fn, tp = confusion_matrix(labels, preds).ravel()
