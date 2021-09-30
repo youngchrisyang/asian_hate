@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
     f1, acc, roc = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
                                      , model_output_dir=config.MODEL_OUTPUT_DIR
-                                     , n_epoch=n_epoch
+                                     , num_epoch=n_epoch
                                      , learning_rate=lr
                                      , rd_seed=15213, save_model=True
                                      )
