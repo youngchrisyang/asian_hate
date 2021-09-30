@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 #% matplotlib inline
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 from sklearn.metrics import matthews_corrcoef, confusion_matrix
-from utils import flat_accuracy, get_eval_report, compute_metrics
+from utils import flat_accuracy, get_eval_report, compute_metrics, get_f1_score
 
 # SETUP GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -224,6 +224,9 @@ for _ in trange(epochs, desc="Epoch"):
   eval_loss, eval_accuracy = 0, 0
   nb_eval_steps, nb_eval_examples = 0, 0
 
+  preds_epoch = []
+  labels_epoch = []
+
   # Evaluate data for one epoch
   for batch in validation_dataloader:
     # Add batch to GPU
@@ -241,12 +244,18 @@ for _ in trange(epochs, desc="Epoch"):
 
     tmp_eval_accuracy = flat_accuracy(logits, label_ids)
 
+    preds_flat = np.argmax(logits, axis=1).flatten()
+    preds_epoch.extend(preds_flat)
+    labels_epoch.extend(label_ids)
+
     eval_accuracy += tmp_eval_accuracy
     nb_eval_steps += 1
 
   print("Validation Accuracy: {}".format(eval_accuracy/nb_eval_steps))
   print("Validation Accuracy: {}".format(eval_accuracy/nb_eval_steps))
-
+  micro_f1, sep_f1s = get_f1_score(preds_epoch, labels_epoch)
+  print("Micro F1 Score: {}".format(micro_f1))
+  print(sep_f1s)
 
 
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
