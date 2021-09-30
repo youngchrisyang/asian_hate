@@ -42,7 +42,10 @@ torch.cuda.get_device_name(0)
 # print("learning rate: " + str(learning_rate))
 # print("number of epoches: " + str(n_epoch))
 
-def model_fine_tuning(src_train_file, model_output_dir, n_epoch = 5, rd_seed = 15213, save_model = False,):
+
+def model_fine_tuning(src_train_file, model_output_dir
+                      , num_epoch=5, learning_rate=5e-6
+                      , rd_seed=15213, save_model=False,):
     # READING TRAINING DATA FOR MODEL FINE-TUNING
     # Note: please use data after "upsampling" so that the binary labels have 50/50 of 1/0s.
     #src_train_file = '../../data/processed_annotations.csv'
@@ -150,10 +153,9 @@ def model_fine_tuning(src_train_file, model_output_dir, n_epoch = 5, rd_seed = 1
     train_loss_set = []
 
     # Number of training epochs (recommend between 2 and 5)
-    epochs = n_epoch
 
     # trange is a tqdm wrapper around the normal python range
-    for _ in trange(epochs, desc="Epoch"):
+    for _ in trange(num_epoch, desc="Epoch"):
         # Training
         # Set our model to training mode (as opposed to evaluation mode)
         model.train()
@@ -226,9 +228,6 @@ def model_fine_tuning(src_train_file, model_output_dir, n_epoch = 5, rd_seed = 1
         micro_f1, sep_f1s = get_f1_score(preds_epoch, labels_epoch)
         print("Micro F1 Score: {}".format(micro_f1))
         print(sep_f1s)
-        print(len(logits_epoch))
-        print(len(logits_epoch[1]))
-        print(len(labels_epoch))
         roc = get_auc(logits_epoch, labels_epoch, classes = [0,1,2])
         print("ROC: {}".format(roc))
 
@@ -252,13 +251,15 @@ def model_fine_tuning(src_train_file, model_output_dir, n_epoch = 5, rd_seed = 1
 
 
 if __name__ == "__main__":
-    learning_rate = float(sys.argv[1])
+    lr = float(sys.argv[1])
     n_epoch = int(sys.argv[2])
     split_random_int = 1111
 
-    f1, acc, roc = model_fine_tuning(src_train_file = config.SOURCE_TRAINING_FILE
-                                     , model_output_dir = config.MODEL_OUTPUT_DIR
-                                     , n_epoch=5, rd_seed=15213, save_model=True
+    f1, acc, roc = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
+                                     , model_output_dir=config.MODEL_OUTPUT_DIR
+                                     , n_epoch=n_epoch
+                                     , learning_rate=lr
+                                     , rd_seed=15213, save_model=True
                                      )
     print(f1)
     print(acc)
