@@ -47,16 +47,15 @@ def get_auc(logits, y_label, classes = [0,1,2]):
     precision = dict()
     recall = dict()
     average_precision = dict()
-    recall_score = dict()
+
     for i in range(n_classes):
         fpr[i], tpr[i], _ = roc_curve(y[:, i], y_pred[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
         precision[i], recall[i], _ = precision_recall_curve(y[:, i], y_pred[:, i])
         average_precision[i] = average_precision_score(y[:, i], y_pred[:, i])
-        recall_score[i] = recall_score(y[:, i], y_pred[:, i])
-
-    return roc_auc, precision, recall, average_precision, recall_score
+    #recall_score = recall_score(y, y_pred)
+    return roc_auc, precision, recall, average_precision
 
 def get_eval_report(labels, preds):
   mcc = matthews_corrcoef(labels, preds)
