@@ -16,6 +16,7 @@ if __name__ == "__main__":
     train = pd.read_csv(os.path.join(src_dir, src_filename), header=None, sep=",", encoding='latin')
     train.columns = ['text','label']
     train = train[1:]
+    train = train[train['label']!='Non-Asian Aggression']
     train.text = train.text.apply(process_text)
     train['num_label'] = train.label.map({'Neutral':0, 'Hate':1, 'Counterhate':2, 'Non-Asian Aggression':1})
     
