@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 #% matplotlib inline
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 from sklearn.metrics import matthews_corrcoef, confusion_matrix
-from utils import flat_accuracy, get_eval_report, compute_metrics, get_f1_score
+from utils import get_auc, flat_accuracy, get_eval_report, compute_metrics, get_f1_score
 
 # SETUP GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -35,6 +35,7 @@ torch.cuda.get_device_name(0)
 # label_name = sys.argv[1]
 learning_rate = float(sys.argv[1])
 n_epoch = int(sys.argv[2])
+rd_seed = int(sys.argv[3])
 #
 # print("label name: " + str(label_name))
 # print("learning rate: " + str(learning_rate))
@@ -95,9 +96,9 @@ for seq in input_ids:
 # Use train_test_split to split our data into train and validation sets for training
 
 train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(input_ids, labels,
-                                                            random_state=2018, test_size=0.2)
+                                                            random_state=rd_seed, test_size=0.2)
 train_masks, validation_masks, _, _ = train_test_split(attention_masks, input_ids,
-                                             random_state=2018, test_size=0.2)
+                                             random_state=rd_seed, test_size=0.2)
 
 print("Convert all of our data into torch tensors, the required datatype for our model")
 
@@ -226,7 +227,7 @@ for _ in trange(epochs, desc="Epoch"):
 
   preds_epoch = []
   labels_epoch = []
-
+  logits_epoch = []
   # Evaluate data for one epoch
   for batch in validation_dataloader:
     # Add batch to GPU
@@ -241,12 +242,12 @@ for _ in trange(epochs, desc="Epoch"):
     # Move logits and labels to CPU
     logits = logits.detach().cpu().numpy()
     label_ids = b_labels.to('cpu').numpy()
-
     tmp_eval_accuracy = flat_accuracy(logits, label_ids)
 
     preds_flat = np.argmax(logits, axis=1).flatten()
     preds_epoch.extend(preds_flat)
     labels_epoch.extend(label_ids)
+    logits_epoch.extend(logits)
 
     eval_accuracy += tmp_eval_accuracy
     nb_eval_steps += 1
@@ -256,7 +257,11 @@ for _ in trange(epochs, desc="Epoch"):
   micro_f1, sep_f1s = get_f1_score(preds_epoch, labels_epoch)
   print("Micro F1 Score: {}".format(micro_f1))
   print(sep_f1s)
-
+  print(len(logits_epoch))
+  print(len(logits_epoch[1]))
+  print(len(labels_epoch))
+  roc = get_auc(logits_epoch, labels_epoch, classes = [0,1,2])
+  print("ROC: {}".format(roc))
 
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 

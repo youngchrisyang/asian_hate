@@ -1,7 +1,9 @@
 import numpy as np
 import re
 import pandas as pd
-from sklearn.metrics import matthews_corrcoef, confusion_matrix, f1_score
+import math
+from sklearn.metrics import roc_curve, auc, matthews_corrcoef, confusion_matrix, f1_score
+from sklearn.preprocessing import label_binarize
 
 hashtags = re.compile(r"^#\S+|\s#\S+")
 mentions = re.compile(r"^@\S+|\s@\S+")
@@ -29,6 +31,24 @@ def get_f1_score(preds, labels):
     micro_f1 = f1_score(labels, preds, average='micro')
     sep_f1s = f1_score(labels, preds, average=None)
     return micro_f1, sep_f1s
+
+def sigmoid(x):
+    return 1 / (1 + math.exp(-x))
+
+def get_auc(logits, y_label, classes = [0,1,2]):
+    y_pred = [list(map(sigmoid, tup)) for tup in logits]
+    y = label_binarize(y_label, classes=classes)
+    n_classes = len(classes)
+    y = np.array(y)
+    y_pred = np.array(y_pred)
+
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        fpr[i], tpr[i], _ = roc_curve(y[:, i], y_pred[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+    return roc_auc
 
 def get_eval_report(labels, preds):
   mcc = matthews_corrcoef(labels, preds)
