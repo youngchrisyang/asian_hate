@@ -228,8 +228,9 @@ def model_fine_tuning(src_train_file, model_output_dir
         micro_f1, sep_f1s = get_f1_score(preds_epoch, labels_epoch)
         print("Micro F1 Score: {}".format(micro_f1))
         print(sep_f1s)
-        roc = get_auc(logits_epoch, labels_epoch, classes = [0,1,2])
+        roc, precision, recall, average_precision = get_auc(logits_epoch, labels_epoch, classes = [0,1,2])
         print("ROC: {}".format(roc))
+        print("Average precision: {}".format(average_precision))
 
     if save_model:
         from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
@@ -247,7 +248,7 @@ def model_fine_tuning(src_train_file, model_output_dir
         torch.save(model_to_save.state_dict(), output_model_file)
         model_to_save.config.to_json_file(output_config_file)
         tokenizer.save_vocabulary(model_output_dir)
-    return micro_f1, accuracy, roc
+    return micro_f1, accuracy, roc, average_precision
 
 
 if __name__ == "__main__":
@@ -255,12 +256,13 @@ if __name__ == "__main__":
     n_epoch = int(sys.argv[2])
     split_random_int = 1111
 
-    f1, acc, roc = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
-                                     , model_output_dir=config.MODEL_OUTPUT_DIR
-                                     , n_epoch=n_epoch
-                                     , learning_rate=lr
-                                     , rd_seed=15213, save_model=True
-                                     )
+    f1, acc, roc, precision = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
+                                             , model_output_dir=config.MODEL_OUTPUT_DIR
+                                             , num_epoch=n_epoch
+                                             , learning_rate=lr
+                                             , rd_seed=15213, save_model=True
+                                             )
     print(f1)
     print(acc)
     print(roc)
+    print(precision)

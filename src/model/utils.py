@@ -1,8 +1,7 @@
 import numpy as np
 import re
-import pandas as pd
 import math
-from sklearn.metrics import roc_curve, auc, matthews_corrcoef, confusion_matrix, f1_score
+from sklearn.metrics import roc_curve, auc, matthews_corrcoef, confusion_matrix, f1_score, precision_recall_curve, average_precision_score, recall_score
 from sklearn.preprocessing import label_binarize
 
 hashtags = re.compile(r"^#\S+|\s#\S+")
@@ -45,10 +44,18 @@ def get_auc(logits, y_label, classes = [0,1,2]):
     fpr = dict()
     tpr = dict()
     roc_auc = dict()
+    precision = dict()
+    recall = dict()
+    average_precision = dict()
+
     for i in range(n_classes):
         fpr[i], tpr[i], _ = roc_curve(y[:, i], y_pred[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
-    return roc_auc
+
+        precision[i], recall[i], _ = precision_recall_curve(y[:, i], y_pred[:, i])
+        average_precision[i] = average_precision_score(y[:, i], y_pred[:, i])
+    #recall_score = recall_score(y, y_pred)
+    return roc_auc, precision, recall, average_precision
 
 def get_eval_report(labels, preds):
   mcc = matthews_corrcoef(labels, preds)
