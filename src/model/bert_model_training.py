@@ -256,7 +256,7 @@ def model_fine_tuning(src_train_file, model_output_dir
 if __name__ == "__main__":
     lr = float(sys.argv[1])
     n_epoch = int(sys.argv[2])
-    goal = int(sys.argv[3])
+    goal = str(sys.argv[3])
 
     if goal == 'eval':
         random.seed(6)
