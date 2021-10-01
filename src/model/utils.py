@@ -40,6 +40,7 @@ def get_auc(logits, y_label, classes = [0,1,2]):
     n_classes = len(classes)
     y = np.array(y)
     y_pred = np.array(y_pred)
+    y_pred_flat = np.argmax(logits, axis=1).flatten()
 
     fpr = dict()
     tpr = dict()
@@ -47,6 +48,7 @@ def get_auc(logits, y_label, classes = [0,1,2]):
     precision = dict()
     recall = dict()
     average_precision = dict()
+    average_recall = dict()
 
     for i in range(n_classes):
         fpr[i], tpr[i], _ = roc_curve(y[:, i], y_pred[:, i])
@@ -54,8 +56,15 @@ def get_auc(logits, y_label, classes = [0,1,2]):
 
         precision[i], recall[i], _ = precision_recall_curve(y[:, i], y_pred[:, i])
         average_precision[i] = average_precision_score(y[:, i], y_pred[:, i])
+
+        idx = [l == classes[i] for l in y_label]
+        total_pos = sum(idx)
+        y_pred_class = y_pred_flat[idx]
+        tp = sum([p == classes[i] for p in y_pred_class])
+        average_recall[i] = (tp + 0.00) / total_pos
+
     #recall_score = recall_score(y, y_pred)
-    return roc_auc, precision, recall, average_precision
+    return roc_auc, precision, recall, average_precision, average_recall
 
 def get_eval_report(labels, preds):
   mcc = matthews_corrcoef(labels, preds)
