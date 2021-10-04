@@ -12,35 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import model_config as config
 
-import sys
-
-label_name = sys.argv[1]
-print('Processing Predictions for label: ' + str(label_name))
-
 # start GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 n_gpu = torch.cuda.device_count()
 torch.cuda.get_device_name(0)
-
-## INITIAL DATA SETUP
-
-
-# load and pre-format test data
-# test_data_file = "/home/paperspace/Documents/data/working_remotely_2020-05-07_2020-06-02.csv"
-
-data_file = "/home/paperspace/Documents/twitter/data/wfh_tweets_data/all_keywords_0301_0601.csv"
-data_output_file = "/home/paperspace/Documents/twitter/data/wfh_tweets_data/all_keywords_0301_0601_with_label_{}.csv".format(
-    label_name)
-
-id_text = pd.read_csv(data_file)
-print('Read raw data: ' + str(id_text.shape))
-
-# id_text = id_text.sort_values(by=['id_str'])
-# id_text = id_text.loc[0:50000]
-print(id_text)
-id_text = id_text[['id_str', 'text']]
-id_text['fake_id'] = np.arange(len(id_text))
-print(id_text.head(10))
 
 
 def inference_data_preprocessing(data_source_file):
@@ -54,7 +29,7 @@ def inference_data_preprocessing(data_source_file):
 
 
 def divide_chunks(l, n):
-    ## Due to memory limit, divide and conqure
+    # Due to memory limit, divide and conqure
     # looping till length l 
     for i in range(0, len(l), n):
         yield l[i:i + n]
@@ -159,7 +134,7 @@ def inference(data, data_output_file, pretrained_model_dir, num_classes, chunk_s
 
         final_output_predictions.append(output_predictions)
 
-    ## After DnC
+    # After DnC
     final_output_predictions = pd.concat(final_output_predictions)
     final_output_predictions.to_csv(data_output_file, index=False)
 
