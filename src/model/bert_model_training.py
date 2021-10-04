@@ -290,7 +290,7 @@ if __name__ == "__main__":
         metrics_summary_file = 'metrics/metrics_summary_{}_epoches_{}_lr'.format(n_epoch, lr)
         with open(metrics_summary_file, 'wb') as filehandle:
             # metrics saved as a dictionary
-            pickle.dump(metrics_summary_file, filehandle)
+            pickle.dump(cv_metrics, filehandle)
     else:
         f1, acc, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
                                                             , model_output_dir=config.MODEL_OUTPUT_DIR
