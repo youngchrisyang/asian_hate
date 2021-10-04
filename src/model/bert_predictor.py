@@ -42,7 +42,7 @@ def inference(data, data_output_file, pretrained_model_dir, num_classes, chunk_s
     chk_cnt = 1
     final_output_predictions = []
     for chk_idx in chunk_indices:
-        chk_id_text = id_text.iloc[chk_idx]
+        chk_id_text = data.iloc[chk_idx]
         print('Using Data from Chunk ' + str(chk_cnt) + " with nrows: " + str(chk_id_text.shape[0]))
         chk_cnt += 1
 
