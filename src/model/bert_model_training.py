@@ -21,6 +21,7 @@ import pandas as pd
 import os
 import pickle
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 #% matplotlib inline
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
@@ -249,21 +250,53 @@ def model_fine_tuning(src_train_file, model_output_dir
         torch.save(model_to_save.state_dict(), output_model_file)
         model_to_save.config.to_json_file(output_config_file)
         tokenizer.save_vocabulary(model_output_dir)
-    return micro_f1, accuracy, roc, average_precision
+    return micro_f1, accuracy, roc, average_precision, average_recall
 
 
 if __name__ == "__main__":
     lr = float(sys.argv[1])
     n_epoch = int(sys.argv[2])
-    split_random_int = 1111
+    goal = str(sys.argv[3])
 
-    f1, acc, roc, precision = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
-                                             , model_output_dir=config.MODEL_OUTPUT_DIR
-                                             , num_epoch=n_epoch
-                                             , learning_rate=lr
-                                             , rd_seed=15213, save_model=True
-                                             )
-    print(f1)
-    print(acc)
-    print(roc)
-    print(precision)
+    if goal == 'eval':
+        random.seed(6)
+        cv_seeds = [random.randint(1, 10000) for i in range(5)]
+
+        cv_metrics = dict()
+
+        for s in cv_seeds:
+            metrics = dict()
+            f1, acc, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
+                                                                , model_output_dir=config.MODEL_OUTPUT_DIR
+                                                                , num_epoch=n_epoch
+                                                                , learning_rate=lr
+                                                                , rd_seed=s
+                                                                , save_model=False
+                                                                )
+            print(f1)
+            print(acc)
+            print(roc)
+            print(precision)
+            print(recall)
+            metrics['f1'] = f1
+            metrics['accuracy'] = acc
+            metrics['roc'] = roc
+            metrics['precision'] = precision
+            metrics['recall'] = recall
+            cv_metrics[s] = metrics
+
+        print(cv_metrics)
+
+        metrics_summary_file = 'metrics/metrics_summary_{}_epoches_{}_lr'.format(n_epoch, lr)
+        with open(metrics_summary_file, 'wb') as filehandle:
+            # metrics saved as a dictionary
+            pickle.dump(metrics_summary_file, filehandle)
+    else:
+        f1, acc, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
+                                                            , model_output_dir=config.MODEL_OUTPUT_DIR
+                                                            , num_epoch=n_epoch
+                                                            , learning_rate=lr
+                                                            , rd_seed=2021
+                                                            , save_model=True
+                                                            )
+    # TODO: obtain average CV metrics
