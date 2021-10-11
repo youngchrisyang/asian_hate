@@ -253,10 +253,25 @@ def model_fine_tuning(src_train_file, model_output_dir
     return sep_f1s, roc, average_precision, average_recall
 
 
+def get_training_config(label):
+    if label == 'asian_hate':
+        src_train = config.SOURCE_TRAINING_FILE
+        model_output = config.MODEL_OUTPUT_DIR
+    elif label == 'sentiment':
+        src_train = config.SENTIMENT_SOURCE_PROCESSED_TRAINING_FILE
+        model_output = config.SENTIMENT_MODEL_OUTPUT_DIR
+    else:
+        return
+    return src_train, model_output
+
+
 if __name__ == "__main__":
     lr = float(sys.argv[1])
     n_epoch = int(sys.argv[2])
     goal = str(sys.argv[3])
+    label = str(sys.argv[4])
+
+    src_train, model_output = get_training_config(label)
 
     if goal == 'eval':
         random.seed(6)
@@ -266,8 +281,8 @@ if __name__ == "__main__":
 
         for s in cv_seeds:
             metrics = dict()
-            f1, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
-                                                           , model_output_dir=config.MODEL_OUTPUT_DIR
+            f1, roc, precision, recall = model_fine_tuning(src_train_file=src_train
+                                                           , model_output_dir=model_output
                                                            , num_epoch=n_epoch
                                                            , learning_rate=lr
                                                            , rd_seed=s
@@ -290,8 +305,8 @@ if __name__ == "__main__":
             # metrics saved as a dictionary
             pickle.dump(cv_metrics, filehandle)
     else:
-        f1, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
-                                                        , model_output_dir=config.MODEL_OUTPUT_DIR
+        f1, roc, precision, recall = model_fine_tuning(src_train_file=src_train
+                                                        , model_output_dir=model_output
                                                         , num_epoch=n_epoch
                                                         , learning_rate=lr
                                                         , rd_seed=2021

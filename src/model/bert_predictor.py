@@ -11,6 +11,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import model_config as config
+import sys
 
 # start GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -142,11 +143,28 @@ def inference(data, data_output_file, pretrained_model_dir, num_classes, chunk_s
 
     return
 
+def get_predict_config(label):
+    if label == 'asian_hate':
+        src_inference_file = config.SOURCE_INFERENCE_ASIAN_HATE_FILE
+        output_file = config.LABELED_DATA_OUTPUT_FILE
+        model_output_dir = config.MODEL_OUTPUT_DIR
+    elif label == 'sentiment':
+        src_inference_file = config.SOURCE_INFERENCE_ASIAN_HATE_FILE
+        output_file = config.LABELED_SENTIMENT_DATA_OUTPUT_FILE
+        model_output_dir = config.SENTIMENT_MODEL_OUTPUT_DIR
+    else:
+        return
+    return src_inference_file, output_file, model_output_dir
+
 
 if __name__ == "__main__":
-    inference_id_text = inference_data_preprocessing(config.SOURCE_INFERENCE_ASIAN_HATE_FILE)
-    inference( data = inference_id_text
-               , data_output_file = config.LABELED_DATA_OUTPUT_FILE
-               , pretrained_model_dir = config.MODEL_OUTPUT_DIR
-               , num_classes = 3
+    label = str(sys.argv[1])
+
+    src_inference_file, output_file, model_output_dir = get_predict_config(label)
+
+    inference_id_text = inference_data_preprocessing(src_inference_file)
+    inference( data=inference_id_text
+               , data_output_file=output_file
+               , pretrained_model_dir=model_output_dir
+               , num_classes=3
                , chunk_size=20000)
