@@ -13,7 +13,8 @@ import model_config as config
 
 
 def get_dir(label):
-    src_filename, dst_filename = ''
+    src_filename = ''
+    dst_filename = ''
     if label == 'asian_hate':
         src_filename = config.ASIAN_HATE_SOURCE_RAW_TRAINING_FILE
         dst_filename = config.SOURCE_TRAINING_FILE

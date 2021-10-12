@@ -3,8 +3,8 @@ ASIAN_HATE_SOURCE_RAW_TRAINING_FILE = '../../data/raw_training_data/annotations.
 SOURCE_TRAINING_FILE = '../../data/processed_annotations.csv'
 MODEL_OUTPUT_DIR = 'pretrained_model_output/'
 
-SENTIMENT_SOURCE_RAW_TRAINING_FILE = '../../data/processed_sentiment140_60k_sample.csv'
-SENTIMENT_SOURCE_PROCESSED_TRAINING_FILE = '../../data/raw_training_data/sentiment140_60k_sample.csv'
+SENTIMENT_SOURCE_RAW_TRAINING_FILE = '../../data/raw_training_data/sentiment140_20k_sample.csv'
+SENTIMENT_SOURCE_PROCESSED_TRAINING_FILE = '../../data/processed_sentiment140_20k_sample.csv'
 SENTIMENT_MODEL_OUTPUT_DIR = 'pretrained_sentiment_model_output/'
 
 # inference

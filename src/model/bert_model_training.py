@@ -229,7 +229,7 @@ def model_fine_tuning(src_train_file, model_output_dir
         micro_f1, sep_f1s = get_f1_score(preds_epoch, labels_epoch)
         print("Micro F1 Score: {}".format(micro_f1))
         print(sep_f1s)
-        roc, precision, recall, average_precision, average_recall = get_auc(logits_epoch, labels_epoch, classes = [0,1,2])
+        roc, precision, recall, average_precision, average_recall = get_auc(logits_epoch, labels_epoch, classes = range(num_classes))
         print("ROC: {}".format(roc))
         print("Average precision: {}".format(average_precision))
         print("Average recall: {}".format(average_recall))
@@ -300,7 +300,7 @@ if __name__ == "__main__":
 
         print(cv_metrics)
 
-        metrics_summary_file = 'metrics/metrics_summary_{}_epoches_{}_lr'.format(n_epoch, lr)
+        metrics_summary_file = 'metrics/{}_model_metrics_summary_{}_epoches_{}_lr'.format(label, n_epoch, lr)
         with open(metrics_summary_file, 'wb') as filehandle:
             # metrics saved as a dictionary
             pickle.dump(cv_metrics, filehandle)
