@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 #% matplotlib inline
 from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
 from sklearn.metrics import matthews_corrcoef, confusion_matrix
-from utils import get_auc, flat_accuracy, get_eval_report, compute_metrics, get_f1_score
+from utils import get_auc, flat_accuracy, get_f1_score, get_auc_binary
 import model_config as config
 # SETUP GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -219,7 +219,6 @@ def model_fine_tuning(src_train_file, model_output_dir
             preds_epoch.extend(preds_flat)
             labels_epoch.extend(label_ids)
             logits_epoch.extend(logits)
-
             eval_accuracy += tmp_eval_accuracy
             nb_eval_steps += 1
 
@@ -229,10 +228,11 @@ def model_fine_tuning(src_train_file, model_output_dir
         micro_f1, sep_f1s = get_f1_score(preds_epoch, labels_epoch)
         print("Micro F1 Score: {}".format(micro_f1))
         print(sep_f1s)
-        roc, precision, recall, average_precision, average_recall = get_auc(logits_epoch, labels_epoch, classes = [0,1,2])
+        if num_classes >= 3:
+            roc, precision, recall = get_auc(logits_epoch, labels_epoch, classes = range(num_classes))
+        else:
+            roc, precision, recall = get_auc_binary(preds_epoch, labels_epoch)
         print("ROC: {}".format(roc))
-        print("Average precision: {}".format(average_precision))
-        print("Average recall: {}".format(average_recall))
 
     if save_model:
         from pytorch_pretrained_bert import WEIGHTS_NAME, CONFIG_NAME
@@ -250,13 +250,27 @@ def model_fine_tuning(src_train_file, model_output_dir
         torch.save(model_to_save.state_dict(), output_model_file)
         model_to_save.config.to_json_file(output_config_file)
         tokenizer.save_vocabulary(model_output_dir)
-    return sep_f1s, roc, average_precision, average_recall
+    return micro_f1, roc, precision, recall
+
+def get_training_config(label):
+    if label == 'asian_hate':
+        src_train = config.SOURCE_TRAINING_FILE
+        model_output = config.MODEL_OUTPUT_DIR
+    elif label == 'sentiment':
+        src_train = config.SENTIMENT_SOURCE_PROCESSED_TRAINING_FILE
+        model_output = config.SENTIMENT_MODEL_OUTPUT_DIR
+    else:
+        return
+    return src_train, model_output
 
 
 if __name__ == "__main__":
     lr = float(sys.argv[1])
     n_epoch = int(sys.argv[2])
     goal = str(sys.argv[3])
+    label = str(sys.argv[4])
+
+    src_train, model_output = get_training_config(label)
 
     if goal == 'eval':
         random.seed(6)
@@ -266,8 +280,8 @@ if __name__ == "__main__":
 
         for s in cv_seeds:
             metrics = dict()
-            f1, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
-                                                           , model_output_dir=config.MODEL_OUTPUT_DIR
+            f1, roc, precision, recall = model_fine_tuning(src_train_file=src_train
+                                                           , model_output_dir=model_output
                                                            , num_epoch=n_epoch
                                                            , learning_rate=lr
                                                            , rd_seed=s
@@ -285,16 +299,16 @@ if __name__ == "__main__":
 
         print(cv_metrics)
 
-        metrics_summary_file = 'metrics/metrics_summary_{}_epoches_{}_lr'.format(n_epoch, lr)
+        metrics_summary_file = 'metrics/{}_model_metrics_summary_{}_epoches_{}_lr'.format(label, n_epoch, lr)
         with open(metrics_summary_file, 'wb') as filehandle:
             # metrics saved as a dictionary
             pickle.dump(cv_metrics, filehandle)
     else:
-        f1, roc, precision, recall = model_fine_tuning(src_train_file=config.SOURCE_TRAINING_FILE
-                                                        , model_output_dir=config.MODEL_OUTPUT_DIR
-                                                        , num_epoch=n_epoch
-                                                        , learning_rate=lr
-                                                        , rd_seed=2021
-                                                        , save_model=True
-                                                        )
+        f1, roc, precision, recall = model_fine_tuning(src_train_file=src_train
+                , model_output_dir=model_output
+                , num_epoch=n_epoch
+                , learning_rate=lr
+                , rd_seed=2021
+                , save_model=True
+                )
     # TODO: obtain average CV metrics
