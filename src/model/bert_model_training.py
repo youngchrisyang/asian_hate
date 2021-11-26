@@ -219,7 +219,6 @@ def model_fine_tuning(src_train_file, model_output_dir
             preds_epoch.extend(preds_flat)
             labels_epoch.extend(label_ids)
             logits_epoch.extend(logits)
-
             eval_accuracy += tmp_eval_accuracy
             nb_eval_steps += 1
 
@@ -232,7 +231,7 @@ def model_fine_tuning(src_train_file, model_output_dir
         if num_classes >= 3:
             roc, precision, recall = get_auc(logits_epoch, labels_epoch, classes = range(num_classes))
         else:
-            roc, precision, recall = get_auc_binary(logits_epoch, labels_epoch)
+            roc, precision, recall = get_auc_binary(preds_epoch, labels_epoch)
         print("ROC: {}".format(roc))
 
     if save_model:
@@ -251,8 +250,7 @@ def model_fine_tuning(src_train_file, model_output_dir
         torch.save(model_to_save.state_dict(), output_model_file)
         model_to_save.config.to_json_file(output_config_file)
         tokenizer.save_vocabulary(model_output_dir)
-    return sep_f1s, roc, average_precision, average_recall
-
+    return micro_f1, roc, precision, recall
 
 def get_training_config(label):
     if label == 'asian_hate':
@@ -307,10 +305,10 @@ if __name__ == "__main__":
             pickle.dump(cv_metrics, filehandle)
     else:
         f1, roc, precision, recall = model_fine_tuning(src_train_file=src_train
-                                                        , model_output_dir=model_output
-                                                        , num_epoch=n_epoch
-                                                        , learning_rate=lr
-                                                        , rd_seed=2021
-                                                        , save_model=True
-                                                        )
+                , model_output_dir=model_output
+                , num_epoch=n_epoch
+                , learning_rate=lr
+                , rd_seed=2021
+                , save_model=True
+                )
     # TODO: obtain average CV metrics

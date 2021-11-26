@@ -161,10 +161,15 @@ if __name__ == "__main__":
     label = str(sys.argv[1])
 
     src_inference_file, output_file, model_output_dir = get_predict_config(label)
+    
+    if label == 'sentiment':
+        n_class = 2
+    elif label == 'asian_hate':
+        n_class = 3
 
     inference_id_text = inference_data_preprocessing(src_inference_file)
     inference( data=inference_id_text
                , data_output_file=output_file
                , pretrained_model_dir=model_output_dir
-               , num_classes=3
+               , num_classes=n_class
                , chunk_size=20000)
